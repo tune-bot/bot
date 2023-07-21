@@ -5,13 +5,11 @@ import (
 	"os"
 
 	"github.com/bwmarrin/discordgo"
-
-	bot "github.com/tune-bot/discord/bot"
-	data "github.com/tune-bot/discord/data"
+	"github.com/tune-bot/discord/bot"
 )
 
 func main() {
-	if session, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv(data.TOKEN_VAR))); err == nil {
+	if session, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_TOKEN"))); err == nil {
 		bot.Start(session)
 	}
 }

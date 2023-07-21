@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,8 +9,9 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	command "github.com/tune-bot/discord/command"
-	data "github.com/tune-bot/discord/data"
+	"github.com/tune-bot/database"
+	"github.com/tune-bot/discord/command"
+	"github.com/tune-bot/discord/data"
 )
 
 func Start(session *discordgo.Session) {
@@ -25,12 +25,23 @@ func Start(session *discordgo.Session) {
 		log.Fatal(err)
 		return
 	}
+	log.Println("Started Discord session")
+
+	// Open a connection to the database
+	if err = database.Connect(); err != nil {
+		log.Fatal(err)
+		return
+	}
+	log.Println("Connected to database")
 
 	// Wait until interrupt signal is received, then exit
-	fmt.Printf("%s is running...\n(Ctrl+C to kill)\n", data.TITLE)
+	log.Printf("%s is running...\n(Ctrl+C to kill)\n", data.TITLE)
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
+
+	log.Println("Ending Discord session")
+	database.Disconnect()
 	session.Close()
 }
 
@@ -42,17 +53,12 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Parse a command
 	if strings.HasPrefix(m.Content, data.CMD_PREFIX) {
-		cmd := m.Content[strings.LastIndex(m.Content, data.CMD_PREFIX)+1:]
-		args := strings.Split(cmd, " ")
+		tokens := strings.Split(m.Content[strings.LastIndex(m.Content, data.CMD_PREFIX)+1:], " ")
+		cmd := tokens[0]
+		args := tokens[1:]
 
-		if callback, ok := command.Commands[args[0]]; ok {
-			result := "Failure!"
-
-			if callback(m.ChannelID, args[1:]) {
-				result = "Success!"
-			}
-
-			s.ChannelMessageSend(m.ChannelID, result)
+		if callback, ok := command.Commands[cmd]; ok {
+			s.ChannelMessageSend(m.ChannelID, callback(args))
 		}
 	}
 }
