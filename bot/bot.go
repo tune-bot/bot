@@ -1,26 +1,48 @@
 package bot
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/tune-bot/database"
-	"github.com/tune-bot/discord/command"
 	"github.com/tune-bot/discord/data"
 )
 
-func Start(session *discordgo.Session) {
+// Wrap a Discord session and other bot data
+type Bot struct {
+	*discordgo.Session
+
+	running bool
+}
+
+// The bot singleton
+var Tunebot *Bot
+
+// Initialize the bot
+func init() {
+	var session *discordgo.Session
+	var err error
+
+	if session, err = discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_TOKEN"))); err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	Tunebot = &Bot{Session: session}
+}
+
+func (b *Bot) Start() {
 	// Register the onMessage callback handler, only receive server messages
-	session.Identify.Intents = discordgo.IntentsGuildMessages
-	session.AddHandler(onMessage)
+	b.Identify.Intents = discordgo.IntentsGuildMessages
+	b.AddHandler(onMessage)
 
 	// Open a connection to Discord and begin listening
-	err := session.Open()
+	err := b.Open()
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -34,15 +56,28 @@ func Start(session *discordgo.Session) {
 	}
 	log.Println("Connected to database")
 
-	// Wait until interrupt signal is received, then exit
-	log.Printf("%s is running...\n(Ctrl+C to kill)\n", data.TITLE)
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sc
+	// Wait until the bot is told to close
+	var wg sync.WaitGroup
+	wg.Add(1)
+	b.running = true
 
-	log.Println("Ending Discord session")
-	database.Disconnect()
-	session.Close()
+	go func() {
+		defer func() {
+			log.Println("Ending Discord session")
+			database.Disconnect()
+			b.Close()
+			wg.Done()
+		}()
+
+		for b.running {
+		}
+	}()
+	
+	wg.Wait()
+}
+
+func (b *Bot) Stop() {
+	b.running = false
 }
 
 func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -57,8 +92,8 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		cmd := tokens[0]
 		args := tokens[1:]
 
-		if callback, ok := command.Commands[cmd]; ok {
-			s.ChannelMessageSend(m.ChannelID, callback(args))
+		if callback, ok := commands[cmd]; ok {
+			s.ChannelMessageSend(m.ChannelID, callback(Tunebot, args))
 		}
 	}
 }
