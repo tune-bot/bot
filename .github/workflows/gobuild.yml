@@ -24,13 +24,14 @@ jobs:
     - name: Install Dependencies
       run: |
         go get honnef.co/go/tools/cmd/staticcheck
+        go install honnef.co/go/tools/cmd/staticcheck
         go mod tidy
         
     - name: Lint & Vet
       run: |
        go vet .
        staticcheck .
-        
+
     - name: Validate Build
       run: go build . 
   
