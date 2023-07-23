@@ -69,10 +69,11 @@ func (b *Bot) Start() {
 			wg.Done()
 		}()
 
+		log.Printf("%s ready!\n", data.TITLE)
 		for b.running {
 		}
 	}()
-	
+
 	wg.Wait()
 }
 
@@ -93,7 +94,7 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		args := tokens[1:]
 
 		if callback, ok := commands[cmd]; ok {
-			s.ChannelMessageSend(m.ChannelID, callback(Tunebot, args))
+			s.ChannelMessageSend(m.ChannelID, callback(Tunebot, m, args))
 		}
 	}
 }
