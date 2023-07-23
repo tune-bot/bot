@@ -31,6 +31,6 @@ jobs:
        go vet .
        staticcheck .
         
-    - name: Build Validation
+    - name: Validate Build
       run: go build . 
   
