@@ -23,7 +23,7 @@ jobs:
     
     - name: Install Dependencies
       run: |
-        go install honnef.co/go/tools/cmd/staticcheck@latest
+        go install honnef.co/go/tools/cmd/staticcheck
         go mod tidy
         
     - name: Lint & Vet
