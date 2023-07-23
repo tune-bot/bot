@@ -1,6 +1,6 @@
 package data
 
 const (
-	TITLE      = "TuneBot"
+	TITLE      = "Tune Bot"
 	CMD_PREFIX = "?"
 )
