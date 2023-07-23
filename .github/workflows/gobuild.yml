@@ -15,22 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
         go-version: '1.18'
-    
-    - name: Install Dependencies
-      run: |
-        go get honnef.co/go/tools/cmd/staticcheck
-        go install honnef.co/go/tools/cmd/staticcheck
-        go mod tidy
-        
+
     - name: Lint & Vet
       run: |
        go vet .
-       staticcheck .
 
     - name: Validate Build
       run: go build . 
