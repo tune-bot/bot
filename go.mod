@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1
-	github.com/tune-bot/database v1.1.3-0.20230723030957-45dccd47b9b4
+	github.com/tune-bot/database v1.1.8-0.20230724211145-fcda3d68a59e
 )
 
 require (
