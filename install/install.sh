@@ -9,6 +9,6 @@ apt install -y golang
 mkdir -p bin
 
 echo "#!/bin/bash" > bin/discord
-echo "source infrastructure/discord.env" >> bin/discord
-echo "cd discord && go run ." >> bin/discord
+echo "source vars/discord.env" >> bin/discord
+echo "cd discord && git stash && git pull && go run ." >> bin/discord
 chmod a+rx bin/discord
