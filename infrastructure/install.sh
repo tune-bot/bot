@@ -10,5 +10,6 @@ mkdir -p bin
 
 echo "#!/bin/bash" > bin/bot
 echo "source vars/discord.env" >> bin/bot
+echo "bin/download -U" >> bin/bot
 echo "cd discord && git stash && git pull && go run ." >> bin/bot
 chmod a+rx bin/bot
