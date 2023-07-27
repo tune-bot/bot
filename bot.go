@@ -10,7 +10,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/tune-bot/database"
+	"github.com/tune-bot/core"
 )
 
 // Wrap a Discord session and other bot data
@@ -62,7 +62,7 @@ func (b *Bot) start() {
 	log.Println("Started Discord session")
 
 	// Open a connection to the database
-	if err = database.Connect(); err != nil {
+	if err = core.Connect(); err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -76,7 +76,7 @@ func (b *Bot) start() {
 	go func() {
 		defer func() {
 			log.Println("Ending Discord session")
-			database.Disconnect()
+			core.Disconnect()
 			b.Close()
 			wg.Done()
 		}()

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/tune-bot/database"
+	"github.com/tune-bot/core"
 )
 
 // A command callback takes a reference to the bot singleton and
@@ -40,11 +40,11 @@ func cmdLink(b *Bot, m *discordgo.MessageCreate, args []string) (string, reactio
 		return rsp, nil
 	}
 
-	discordUser := database.Discord{Name: m.Author.Username}
-	tunebotUser := database.User{Username: args[0]}
+	discordUser := core.Discord{Name: m.Author.Username}
+	tunebotUser := core.User{Username: args[0]}
 
 	// Check if the Tunebot user exists before trying to link a Discord account to it
-	if _, err := database.FindUser(tunebotUser.Username); err != nil {
+	if _, err := core.FindUser(tunebotUser.Username); err != nil {
 		return err.Error(), nil
 	}
 
@@ -55,7 +55,7 @@ func cmdLink(b *Bot, m *discordgo.MessageCreate, args []string) (string, reactio
 	}
 
 	// If there isn't an account linked, GetUser will return a specific error
-	if err == database.ErrNoDiscordUser {
+	if err == core.ErrNoDiscordUser {
 		rsp = fmt.Sprintf("%s\nTo link your Discord account, react to this message", err)
 		return rsp, linkUserCallback
 	}

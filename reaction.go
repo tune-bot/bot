@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/tune-bot/database"
+	"github.com/tune-bot/core"
 )
 
 // Callbacks for reactions on bot messages
@@ -24,12 +24,12 @@ func linkUserCallback(_ *Bot, r *discordgo.MessageReactionAdd, args []string) st
 	var userId string
 	var err error
 
-	if userId, err = database.FindUser(args[0]); err != nil {
+	if userId, err = core.FindUser(args[0]); err != nil {
 		return err.Error()
-	} 
-	
-	discordUser := database.Discord{
-		Name: r.Member.User.Username,
+	}
+
+	discordUser := core.Discord{
+		Name:   r.Member.User.Username,
 		UserId: userId,
 	}
 
